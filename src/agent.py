@@ -12,6 +12,7 @@ from src.respond import context_query, decide, draft_reply
 from src.sources.app_store import fetch_app_store_reviews
 from src.sources.bluesky import fetch_bluesky_posts
 from src.sources.web_search import fetch_web_results
+from src.sources.youtube import fetch_youtube_comments
 
 logger = logging.getLogger(__name__)
 
@@ -19,6 +20,7 @@ SOURCES = {
     "app_store": fetch_app_store_reviews,
     "bluesky": fetch_bluesky_posts,
     "web": fetch_web_results,
+    "youtube": fetch_youtube_comments,
 }
 REPLY_ACTIONS = {"draft", "escalate"}
 MAX_DRAFTS = 12

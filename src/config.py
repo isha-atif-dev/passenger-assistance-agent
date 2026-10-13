@@ -41,3 +41,10 @@ WEB_QUERIES = [
     "UK train wheelchair assistance left stranded forum",
     "Passenger Assistance app review problems rail",
 ]
+
+YOUTUBE_QUERIES = [
+    "Passenger Assist train wheelchair assistance UK",
+    "Passenger Assistance app rail",
+]
+YOUTUBE_VIDEOS_PER_QUERY = 3
+YOUTUBE_COMMENTS_PER_VIDEO = 10

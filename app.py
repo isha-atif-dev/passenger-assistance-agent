@@ -20,7 +20,7 @@ from src.respond import context_query, decide, draft_reply
 
 ACTIONS = ("escalate", "draft", "lead", "pending", "skip")
 REVIEWABLE = {"escalate", "draft"}
-SOURCE_NAMES = {"app_store": "App Store", "bluesky": "Bluesky", "web": "Web"}
+SOURCE_NAMES = {"app_store": "App Store", "bluesky": "Bluesky", "web": "Web", "youtube": "YouTube"}
 DECISION_STYLES = {"escalate": "high", "draft": "low", "lead": "medium", "pending": "muted", "skip": "muted"}
 STATUS_STYLES = {"approved": "low", "rejected": "high", "not reviewed": "muted"}
 

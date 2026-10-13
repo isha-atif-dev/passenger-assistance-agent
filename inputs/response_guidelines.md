@@ -22,6 +22,8 @@ but train operators deliver the assistance on the ground.
 - App Store: our reply appears as a public developer response. People cannot message us there,
   so point them to the in-app feedback option. Never suggest a private or direct message.
 - Bluesky: for anything personal, invite the person to send us a direct message.
+- YouTube: our reply appears as a public comment. People cannot message us there,
+  so point them to the in-app feedback option or the operator. Never suggest a direct message.
 
 ## Rules
 - Never promise compensation, refunds or outcomes. Explain how to raise it instead.
