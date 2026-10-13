@@ -1,0 +1,18 @@
+[
+  {"id": "e01", "source": "bluesky", "text": "Booked assistance at Leeds for 14:10, nobody is here, my train leaves in 5 minutes and I can't get on without the ramp. Platform staff not answering.", "expected": "escalate"},
+  {"id": "e02", "source": "bluesky", "text": "Stuck on the train at Crewe in my wheelchair. The ramp I booked never arrived and the doors are about to close. Please help.", "expected": "escalate"},
+  {"id": "e03", "source": "app_store", "text": "Crashes constantly. The app closes every time I try to add my mobility scooter to my profile.", "expected": "draft"},
+  {"id": "e04", "source": "app_store", "text": "Booked help through the app for my mum. Staff were waiting with a wheelchair at both ends. Brilliant service.", "expected": "draft"},
+  {"id": "e05", "source": "bluesky", "text": "Third time this month the ramp I booked at Huddersfield didn't turn up. Had to wait 40 minutes for the next train. Not good enough.", "expected": "draft"},
+  {"id": "e06", "source": "bluesky", "text": "Is it true you can turn up at a station and ask for assistance without booking? First time travelling by train in my wheelchair next month.", "expected": "draft"},
+  {"id": "e07", "source": "bluesky", "text": "Our cat has learnt to open the fridge door and now nothing in this house is safe anymore.", "expected": "skip"},
+  {"id": "e08", "source": "bluesky", "text": "Wheelchair assistance at Rome Termini was a mess today, waited an hour for staff to bring the lift to the platform.", "expected": "skip"},
+  {"id": "e09", "source": "bluesky", "text": "New report out today says a fifth of booked passenger assistance failed last year. Operators must do better on accessibility.", "expected": "skip"},
+  {"id": "e10", "source": "bluesky", "text": "Planning a journey with us? You can book Passenger Assist up to 2 hours before you travel. Find out more on our website.", "expected": "skip"},
+  {"id": "e11", "source": "web", "url": "https://forum.example.co.uk/threads/assistance-no-show-reading", "text": "Assistance didn't turn up at Reading, anyone else? My booked help never arrived and I missed my connection to Bristol.", "expected": "lead"},
+  {"id": "e12", "source": "web", "url": "https://www.example.gov.uk/passenger-assist-delivery-guidance.pdf", "text": "Guidance for train operators on delivering Passenger Assist and monitoring accessible travel performance.", "expected": "skip"},
+  {"id": "e13", "source": "app_store", "text": "Can't log in. The verification code never arrives and nobody answers my emails to support.", "expected": "draft"},
+  {"id": "e14", "source": "bluesky", "text": "Staff at the station rolled their eyes when I asked for the ramp and said I should have booked. I had booked assistance two days ago.", "expected": "draft"},
+  {"id": "e15", "source": "bluesky", "text": "Off to Glasgow tomorrow, first time using Passenger Assist. Slightly nervous but very organised!", "expected": "draft"},
+  {"id": "e16", "source": "bluesky", "text": "My dad uses a wheelchair and the assistance staff at York were amazing, helped him on and off with the ramp in no time.", "expected": "draft"}
+]
