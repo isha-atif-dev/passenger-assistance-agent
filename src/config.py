@@ -26,7 +26,8 @@ LLM_TIMEOUT = 30
 MAX_ITEMS_PER_SOURCE = 15
 BLUESKY_RESULTS_PER_QUERY = 10
 
-APP_STORE_TERM = "Passenger Assistance"
+# Passenger Assistance app on the UK App Store
+APP_STORE_APP_ID = 1542190496
 
 BLUESKY_QUERIES = [
     '"passenger assist"',
