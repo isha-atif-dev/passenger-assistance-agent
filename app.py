@@ -7,6 +7,7 @@ Run from the project root:
 
 import html
 import json
+from collections import Counter
 from datetime import datetime
 from pathlib import Path
 
@@ -20,7 +21,8 @@ from src.respond import context_query, decide, draft_reply
 
 ACTIONS = ("escalate", "draft", "lead", "pending", "skip")
 REVIEWABLE = {"escalate", "draft"}
-SOURCE_NAMES = {"app_store": "App Store", "bluesky": "Bluesky", "web": "Web", "youtube": "YouTube"}
+SOURCE_NAMES = {"app_store": "App Store", "bluesky": "Bluesky", "youtube": "YouTube", "web": "Web"}
+DIAGRAM_FILE = config.ROOT_DIR / "docs" / "decision_flow.png"
 DECISION_STYLES = {"escalate": "high", "draft": "low", "lead": "medium", "pending": "muted", "skip": "muted"}
 STATUS_STYLES = {"approved": "low", "rejected": "high", "not reviewed": "muted"}
 
@@ -29,7 +31,18 @@ STYLE = """
 div.block-container {padding-top: 2rem;}
 .badge {display: inline-block; padding: 2px 10px; margin: 0 6px 4px 0; border-radius: 999px;
         font-size: 0.78rem; font-weight: 600;}
-.b-source {background: #EEF2FF; color: #3730A3;}
+.b-app_store {background: #EEF2FF; color: #3730A3;}
+.b-bluesky {background: #E0F2FE; color: #075985;}
+.b-youtube {background: #FFE4E6; color: #9F1239;}
+.b-web {background: #CCFBF1; color: #115E59;}
+.flow {display: flex; gap: 8px; align-items: stretch; flex-wrap: wrap; margin: 6px 0 14px;}
+.step {flex: 1; min-width: 140px; background: #F8FAFF; border: 1px solid #C7D2FE; border-radius: 12px;
+       padding: 12px 14px;}
+.step .t {font-size: 0.75rem; font-weight: 700; color: #4F46E5; text-transform: uppercase; letter-spacing: 0.04em;}
+.step .n {font-size: 1.9rem; font-weight: 700; color: #1E1B4B; line-height: 1.2;}
+.step .s {font-size: 0.8rem; color: #6B7280;}
+.step.last {flex: 1.6; background: #F0FDF4; border-color: #BBF7D0;}
+.arrow {align-self: center; color: #A5B4FC; font-size: 1.4rem;}
 .b-high {background: #FEE2E2; color: #991B1B;}
 .b-medium {background: #FEF3C7; color: #92400E;}
 .b-low {background: #DCFCE7; color: #166534;}
@@ -70,7 +83,7 @@ def badge(text: str, style: str) -> str:
 def post_badges(source: str, label: dict) -> str:
     urgency = label.get("urgency") or "low"
     return (
-        badge(SOURCE_NAMES.get(source, source), "source")
+        badge(SOURCE_NAMES.get(source, source), source if source in SOURCE_NAMES else "muted")
         + badge((label.get("category") or "other").replace("_", " "), "muted")
         + badge(f"{urgency} urgency", urgency if urgency in ("high", "medium") else "low")
     )
@@ -80,6 +93,42 @@ def show_post(post: dict, label: dict) -> None:
     st.markdown(f'<div class="post">{html.escape(post["text"])}</div>', unsafe_allow_html=True)
     link = f" · [Open original]({post['url']})" if post.get("url") else ""
     st.caption(f"Why: {label.get('reason', '')}{link}")
+
+
+def render_pipeline(stats: dict) -> None:
+    """Show how this run's posts moved through each stage, left to right."""
+    collected = stats.get("collected", 0)
+    kept = collected - stats.get("removed_by_pre_filter", 0)
+    labelled = stats.get("labelled", 0)
+    relevant = labelled - stats.get("skip", 0)
+    outcomes = (
+        badge(f"{stats.get('draft', 0)} drafts", "low")
+        + badge(f"{stats.get('escalate', 0)} urgent", "high")
+        + badge(f"{stats.get('lead', 0)} leads", "medium")
+        + badge(f"{stats.get('pending', 0)} pending", "muted")
+    )
+    steps = [
+        ("Collected", collected, "App Store · Bluesky · YouTube · Web"),
+        ("Pre-filter", kept, f"{stats.get('removed_by_pre_filter', 0)} removed for free"),
+        ("AI judged", labelled, f"{stats.get('already_handled', 0)} already handled"),
+        ("Relevant", relevant, f"{stats.get('skip', 0)} skipped"),
+    ]
+    cards = [
+        f'<div class="step"><div class="t">{title}</div><div class="n">{value}</div><div class="s">{note}</div></div>'
+        for title, value, note in steps
+    ]
+    cards.append(f'<div class="step last"><div class="t">Outcome</div><div style="margin-top:8px">{outcomes}</div></div>')
+    arrow = '<div class="arrow">→</div>'
+    st.markdown(f'<div class="flow">{arrow.join(cards)}</div>', unsafe_allow_html=True)
+
+
+def render_how_tab() -> None:
+    st.caption("Three questions decide what happens to every post: is it relevant, should we draft a reply, "
+               "and do we need more context?")
+    if DIAGRAM_FILE.exists():
+        st.image(str(DIAGRAM_FILE), width=760)
+    else:
+        st.info("Diagram not found. Expected docs/decision_flow.png.")
 
 
 def set_decision(post_id: str, status: str, url: str) -> None:
@@ -210,7 +259,7 @@ def main() -> None:
         st.divider()
         st.subheader("How it works")
         st.markdown(
-            "1. Collect posts from the App Store, Bluesky and the web\n"
+            "1. Collect posts from the App Store, Bluesky, YouTube and the web\n"
             "2. Judge whether each post is relevant\n"
             "3. Skip, lead, escalate or draft\n"
             "4. Look up official context when needed\n"
@@ -229,24 +278,19 @@ def main() -> None:
     groups = {action: [item for item in run["items"] if item["action"] == action] for action in ACTIONS}
     stats = run["stats"]
 
-    summary = [
-        ("Posts collected", stats.get("collected", 0)),
-        ("To review", len(groups["escalate"]) + len(groups["draft"])),
-        ("Urgent", len(groups["escalate"])),
-        ("Leads", len(groups["lead"])),
-        ("Pending", len(groups["pending"])),
-    ]
-    for column, (title, value) in zip(st.columns(len(summary)), summary):
-        column.metric(title, value)
+    render_pipeline(stats)
+    by_source = Counter(SOURCE_NAMES.get(item["post"]["source"], item["post"]["source"]) for item in run["items"])
     with st.expander(f"Run details · {run_time(run_path)}"):
         st.write(" · ".join(f"{key.replace('_', ' ')}: {value}" for key, value in stats.items()))
+        st.write("Judged by source: " + " · ".join(f"{name}: {count}" for name, count in by_source.items()))
 
-    review, leads, pending, skipped, test = st.tabs([
+    review, leads, pending, skipped, test, how = st.tabs([
         f"Review ({len(groups['escalate']) + len(groups['draft'])})",
         f"Leads ({len(groups['lead'])})",
         f"Pending ({len(groups['pending'])})",
         f"Skipped ({len(groups['skip'])})",
         "Test a post",
+        "How it decides",
     ])
     with review:
         render_review_tab(groups["escalate"], groups["draft"], run_path)
@@ -258,6 +302,8 @@ def main() -> None:
         render_list_tab(groups["skip"], "Posts judged not relevant, or not a passenger's own experience.")
     with test:
         render_test_tab()
+    with how:
+        render_how_tab()
 
 
 if __name__ == "__main__":
