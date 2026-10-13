@@ -58,7 +58,7 @@ The full decision flow is in `docs/decision_flow.md`.
 
 | Source | Why | How |
 |---|---|---|
-| App Store reviews | Highest signal: every review is about the Passenger Assistance app or the service | Apple's public reviews feed for the app's fixed ID. Falls back from most recent to most helpful when the feed comes back empty |
+| App Store reviews | Highest signal: every review is about the Passenger Assistance app or the service | Apple's public reviews feed for the app's fixed ID. If the feed comes back empty, it tries a second feed order, then the last successful fetch (logged when used) |
 | Bluesky | First-hand posts, often written during or just after a journey | Authenticated search with an app password. Unauthenticated public search returned 403 |
 | Web search (Tavily) | Reaches forums, Facebook groups and other community threads | Results become leads, because a snippet is not a full thread |
 
@@ -114,13 +114,16 @@ Later runs led to four more changes:
 - Context lookups were spent on unhelpful searches such as station codes. Model-suggested lookups are now limited to direct questions.
 - The App Store feed came back empty twice in a row. The source now uses the app's fixed ID (one call instead of two) and a second feed order.
 - When both models failed on one draft, the post was recorded as handled and would never have been retried. Failed drafts now go back in the queue, and rate limits get a retry.
+- Apple's feed stopped returning reviews after many test runs. The source now falls back to the last successful fetch and says so in the log.
+- Some drafts apologised for a failure the person never described, or added details such as "today". The classifier's labels were being treated as facts. The drafting prompt now treats labels as hints and sticks to what the post says, and the guidelines gained a rule to the same effect.
 
 ## Limitations
 
 - The evaluation sets are small, and borderline cases can get different answers on different runs.
 - Web results are page snippets, so the agent never sees the full thread.
 - Search terms are fixed, so recall is unknown: relevant posts that use other words are missed.
-- Only the latest page of App Store reviews is read, and Apple's feed is sometimes empty or throttled.
+- Only the latest page of App Store reviews is read, and Apple's feed is sometimes empty or throttled. When that happens, the cached reviews may be out of date.
+- Drafts can still occasionally assume details that are not in the post. The reviewer note and human review are the safety net.
 - Context lookups return short snippets, which may not contain the exact redress process for a given operator.
 - Post text is sent to Gemini, Groq and Langfuse. A real deployment would need agreements with those providers, or self-hosting and masking of personal details.
 - Model calls run one after another, so a run takes one to two minutes on the free tier.
@@ -164,8 +167,10 @@ docs/decision_flow.md          decision flow diagram
 
 | Share of time | Work |
 |---|---|
-| About 10% | Reading the brief, choosing the context and sources, planning |
-| About 25% | Building the pipeline: sources, labelling, decision rules, drafting |
+| About 5% | Reading the brief, choosing the context and sources, planning |
+| About 30% | Building the pipeline: sources, labelling, decision rules, drafting |
 | About 35% | Reviewing real output and fixing what it showed |
 | About 30% | Evaluation, review screen, tracing, diagram and this README |
 
+## AI coding tool declaration 
+I used Claude as a coding assistant to help me implement, structure, and refine the code more efficiently, while I focused on designing the agent's workflow, making key technical decisions, testing its functionality, identifying issues, and evaluating its performance.
