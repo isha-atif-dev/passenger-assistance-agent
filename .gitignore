@@ -1,6 +1,9 @@
 # Secrets
 .env
 
+# Run outputs contain real people's posts
+outputs/
+
 # Python
 __pycache__/
 *.pyc
