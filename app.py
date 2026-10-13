@@ -210,7 +210,7 @@ def main() -> None:
         st.divider()
         st.subheader("How it works")
         st.markdown(
-            "1. Collect posts from the App Store, Bluesky and the web\n"
+            "1. Collect posts from the App Store, Bluesky, YouTube and the web\n"
             "2. Judge whether each post is relevant\n"
             "3. Skip, lead, escalate or draft\n"
             "4. Look up official context when needed\n"
